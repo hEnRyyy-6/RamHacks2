@@ -2,20 +2,20 @@ import json
 import pandas as pd
 from datetime import datetime
 #read in the files 
-with open('/Users/henryvelasquez/RamsHackathon/RamsHackathon/RamHacks2/RAMHACK CASEFILES 4/incident_report_case4.json', 'r') as f:
+with open('RAMHACK CASEFILES 4/incident_report_case4.json', 'r') as f:
     incident_data = json.load(f)
 print(incident_data)
 
-metro_swipes_df = pd.read_csv('/Users/henryvelasquez/RamsHackathon/RamsHackathon/RamHacks2/RAMHACK CASEFILES 4/metro_swipes_case4.csv')
+metro_swipes_df = pd.read_csv('RAMHACK CASEFILES 4/metro_swipes_case4.csv')
 print(metro_swipes_df.head())
 
 #read in the files and make them into dataframes
-with open('/Users/henryvelasquez/RamsHackathon/RamsHackathon/RamHacks2/RAMHACK CASEFILES 4/cell_pings_case4.json','r') as f:
+with open('RAMHACK CASEFILES 4/cell_pings_case4.json','r') as f:
     cell_data = json.load(f)
 cell_ping_df = pd.DataFrame(cell_data)
 print(cell_ping_df.head())
 
-with open('/Users/henryvelasquez/RamsHackathon/RamsHackathon/RamHacks2/RAMHACK CASEFILES 4/suspects_case4.json', 'r') as f:
+with open('RAMHACK CASEFILES 4/suspects_case4.json', 'r') as f:
     suspects_data = json.load(f)
     suspects_data_df = pd.DataFrame(suspects_data)
 print(suspects_data_df.head())
@@ -56,9 +56,9 @@ print("this are the final suspects")
 print(suspects_final)
 
 #convert to csv files for display
-suspects_with_pings.to_csv('/Users/henryvelasquez/RamsHackathon/RamsHackathon/RamHacks2/src/suspects_with_pings.csv', index=False)
+suspects_with_pings.to_csv('src/metro_swipes_final.csv', index=False)
 
-suspects_with_swipes.to_csv('/Users/henryvelasquez/RamsHackathon/RamsHackathon/RamHacks2/src/suspects_with_swipes.csv', index=False)
+suspects_with_swipes.to_csv('src/suspects_with_swipes_final.csv', index=False)
 
-suspects_final.to_csv('/Users/henryvelasquez/RamsHackathon/RamsHackathon/RamHacks2/src/suspects_final.csv', index=False)
+suspects_final.to_csv('src/suspects_final.csv', index=False)
 
