@@ -1,0 +1,2 @@
+name_x,alias_x,card_id_x,phone_id,relationship_x,alibi_x,device_id,timestamp_x,lat,lon,time_diff_x,name_y,alias_y,card_id_y,relationship_y,alibi_y,timestamp_y,station,swipe_type,time_diff_y
+Jordan Lee,jordan_lee,card_jordan,device_jordan,campus security,Reports they were on patrol but no logs provided.,device_jordan,2025-04-10 23:14:00,40.731233,-73.93544,0 days 00:01:00,Jordan Lee,jordan_lee,card_jordan,campus security,Reports they were on patrol but no logs provided.,2025-04-10 23:20:00,Campus Central Station,exit,0 days 00:05:00
