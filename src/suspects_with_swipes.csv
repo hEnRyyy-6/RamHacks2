@@ -1,0 +1,4 @@
+name,alias,card_id,phone_id,relationship,alibi,timestamp,station,swipe_type,time_diff
+Sam Patel,sam_patel,card_sam,device_sam,classmate,Claims they left campus right after class and went home.,2025-04-10 23:00:00,Campus Central Station,exit,0 days 00:15:00
+Maria Lopez,maria_lopez,card_maria,device_maria,ex-roommate,Says they were in a club meeting across town.,2025-04-10 23:05:00,Campus Central Station,exit,0 days 00:10:00
+Jordan Lee,jordan_lee,card_jordan,device_jordan,campus security,Reports they were on patrol but no logs provided.,2025-04-10 23:20:00,Campus Central Station,exit,0 days 00:05:00
