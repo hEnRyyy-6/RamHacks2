@@ -1,63 +1,89 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
-import geopandas as gpd
 
+# Load the necessary CSV files
+suspects_swipes_final_df = pd.read_csv('src/suspects_with_swipes_final.csv')  # Adjust the path
+metro_swipes_df = pd.read_csv('RAMHACK CASEFILES 4/metro_swipes_case4.csv')  # Adjust the path
+suspects_df = pd.read_csv('src/suspects_final.csv')  # Adjust the path
 
-# Load the cleaned CSV files
-suspects_final = pd.read_csv('path_to/suspects_final.csv')
-suspects_with_pings = pd.read_csv('path_to/suspects_with_pings.csv')
-suspects_with_swipes = pd.read_csv('path_to/suspects_with_swipes.csv')
+# Show basic information about the data
+print("Suspects Swipes Final Data")
+print(suspects_swipes_final_df.head())
 
-# Merge the datasets
-merged_data = pd.merge(suspects_with_pings, suspects_with_swipes, on='name', how='left')
-merged_data = pd.merge(merged_data, suspects_final, on='name', how='left')
+# --- 1. Investigating Metro Swipes at Different Stations ---
+# Plot the distribution of the number of swipes at different stations
+station_counts = metro_swipes_df['station'].value_counts()
 
-# Map Locations
-map_center = [40.730610, -73.935242]  # Adjust coordinates as needed
-m = folium.Map(location=map_center, zoom_start=15)
-for _, row in merged_data.iterrows():
-    folium.Marker([row['lat'], row['lon']], popup=f"{row['name']} - {row['timestamp_x']}").add_to(m)
-m.save('suspects_map.html')
-
-# Visualize Movement over Time
 plt.figure(figsize=(10, 6))
-for suspect in merged_data['name'].unique():
-    suspect_data = merged_data[merged_data['name'] == suspect]
-    plt.plot(suspect_data['timestamp_x'], suspect_data['lat'], label=f"{suspect} (Lat)")
-    plt.plot(suspect_data['timestamp_y'], suspect_data['lat'], label=f"{suspect} (Swipe)")
-plt.xlabel('Time')
-plt.ylabel('Latitude')
-plt.title('Suspects’ Movement Over Time')
-plt.legend()
+station_counts.plot(kind='bar', color='green', alpha=0.7)
+plt.title('Number of Metro Swipes at Different Stations', fontsize=16)
+plt.xlabel('Station', fontsize=12)
+plt.ylabel('Number of Swipes', fontsize=12)
 plt.xticks(rotation=45)
 plt.show()
 
-# Visualize Swipes
+# --- 2. Investigating Suspects Swipes and Pings ---
+# Investigating the relationship between swipes and pings for each suspect
+suspects_swipes_final_df['timestamp'] = pd.to_datetime(suspects_swipes_final_df['timestamp'])
+
+# Create a new column 'event' to distinguish between swipe and ping actions
+suspects_swipes_final_df['event'] = suspects_swipes_final_df['swipe_type'].apply(lambda x: 'Swipe' if pd.notna(x) else 'Ping')
+
+# Plot the distribution of events (swipes vs pings) over time
 plt.figure(figsize=(10, 6))
-sns.countplot(data=merged_data, x='station', hue='swipe_type', palette='Set1')
-plt.xlabel('Station')
-plt.ylabel('Number of Swipes')
-plt.title('Metro Swipes at Each Station')
+plt.scatter(suspects_swipes_final_df['timestamp'], suspects_swipes_final_df['name'], c=suspects_swipes_final_df['event'].map({'Swipe': 'blue', 'Ping': 'red'}), label='Event')
+plt.title('Suspects Events Timeline (Swipes and Pings)', fontsize=16)
+plt.xlabel('Timestamp', fontsize=12)
+plt.ylabel('Suspect Name', fontsize=12)
+plt.legend(['Swipe', 'Ping'])
 plt.xticks(rotation=45)
 plt.show()
 
-# Compare Alibis and Activities
-for _, row in merged_data.iterrows():
-    print(f"Name: {row['name']}")
-    print(f"Alibi: {row['alibi_x']}")
-    print(f"Last Known Location: {row['lat']}, {row['lon']}")
-    print(f"Swipe Time: {row['timestamp_y']}")
-    print(f"Swipe Type: {row['swipe_type']}")
-    print(f"Time Difference: {row['time_diff_x']}")
-    print("-" * 50)
+# --- 3. Alibi Investigation with Pings and Swipes ---
+# Investigating how many suspects have both pings and swipes
+suspects_with_both = suspects_swipes_final_df[suspects_swipes_final_df['event'] == 'Ping'].groupby('name').size()
 
-# Visualize Time Differences
 plt.figure(figsize=(10, 6))
-sns.boxplot(data=merged_data, x='name', y='time_diff_x', palette='Set2')
-plt.xlabel('Suspect')
-plt.ylabel('Time Difference')
-plt.title('Time Differences Between Pings and Swipes')
+suspects_with_both.plot(kind='bar', color='purple', alpha=0.7)
+plt.title('Number of Suspects with Both Pings and Swipes', fontsize=16)
+plt.xlabel('Suspect', fontsize=12)
+plt.ylabel('Count', fontsize=12)
 plt.xticks(rotation=45)
 plt.show()
 
+# --- 4. Investigating Time Differences Between Pings and Swipes ---
+# Calculate the time difference between the suspect's swipe and ping events
+suspects_swipes_final_df['time_diff'] = suspects_swipes_final_df.groupby('name')['timestamp'].diff().abs()
+
+# Visualizing the time differences between the ping and swipe actions
+plt.figure(figsize=(10, 6))
+plt.hist(suspects_swipes_final_df['time_diff'].dropna().dt.total_seconds() / 60, bins=20, color='orange', alpha=0.7)
+plt.title('Time Difference Between Suspect Pings and Swipes', fontsize=16)
+plt.xlabel('Time Difference (Minutes)', fontsize=12)
+plt.ylabel('Frequency', fontsize=12)
+plt.show()
+
+# --- 5. Investigating Suspect Activity Correlation with Metro Swipes ---
+# Merging suspects' swipes and metro swipes data based on matching card IDs
+merged_df = pd.merge(suspects_swipes_final_df, metro_swipes_df, on='card_id', how='inner')
+
+# Plot the distribution of swipe times for merged data
+plt.figure(figsize=(10, 6))
+plt.scatter(merged_df['timestamp_x'], merged_df['name'], c=merged_df['swipe_type'].map({'exit': 'green', 'entry': 'red'}), label='Metro Swipe')
+plt.title('Suspects Metro Swipe Timeline', fontsize=16)
+plt.xlabel('Metro Swipe Timestamp', fontsize=12)
+plt.ylabel('Suspect Name', fontsize=12)
+plt.legend(['Exit Swipe', 'Entry Swipe'])
+plt.xticks(rotation=45)
+plt.show()
+
+# --- 6. Investigating Alibis and Metro Swipes ---
+# Visualizing how many suspects have an alibi and their corresponding metro swipe data
+suspects_with_alibis = suspects_df[suspects_df['alibi_x'].notna()]
+suspects_without_alibis = suspects_df[suspects_df['alibi_x'].isna()]
+
+plt.figure(figsize=(8, 6))
+plt.bar(['With Alibi', 'Without Alibi'], [len(suspects_with_alibis), len(suspects_without_alibis)], color=['blue', 'red'], alpha=0.7)
+plt.title('Number of Suspects With and Without Alibi', fontsize=16)
+plt.ylabel('Count', fontsize=12)
+plt.show()
